@@ -1,0 +1,27 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "../node_modules/.prisma/client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Memory {
+  id             String   @id @default(cuid())
+  spotifyTrackId String
+  blurb          String   @db.VarChar(300)
+  sentiment      Int      // -2..2 (v1 can set 0; keep util ready)
+  createdAt      DateTime @default(now())
+}
+
+model IngestLog {
+  id         String   @id @default(cuid())
+  sessionId  String
+  ipHash     String
+  createdAt  DateTime @default(now())
+}
