@@ -15,13 +15,6 @@ model Memory {
   id             String   @id @default(cuid())
   spotifyTrackId String
   blurb          String   @db.VarChar(300)
-  sentiment      Int      // -2..2 (v1 can set 0; keep util ready)
+  sentiment      Int     
   createdAt      DateTime @default(now())
-}
-
-model IngestLog {
-  id         String   @id @default(cuid())
-  sessionId  String
-  ipHash     String
-  createdAt  DateTime @default(now())
 }
