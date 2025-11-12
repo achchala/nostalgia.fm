@@ -72,8 +72,7 @@ export default function Home() {
         setMatchResult(data)
       }
     } catch (error) {
-      console.error('Submit error:', error)
-      alert('Failed to submit memory. Please try again.')
+      alert('Failed to submit memory')
     } finally {
       setIsSubmitting(false)
     }
