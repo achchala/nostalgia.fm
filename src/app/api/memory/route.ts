@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/db'
+import { supabase } from '@/lib/supabase'
 import { bucketize } from '@/lib/sentiment'
 import { getTrack } from '@/lib/spotify'
 
@@ -13,34 +13,46 @@ export async function POST(request: NextRequest) {
     }
 
     if (!blurb || typeof blurb !== 'string' || blurb.trim().length === 0) {
-      return NextResponse.json({ error: 'Blurb is required' }, { status: 400 })
+      return NextResponse.json({ error: 'memory is required' }, { status: 400 })
     }
 
     if (blurb.length > 300) {
-      return NextResponse.json({ error: 'Blurb must be ≤300 characters' }, { status: 400 })
+      return NextResponse.json({ error: 'memory must be ≤300 characters' }, { status: 400 })
     }
 
     const sentiment = bucketize(blurb)
 
-    const memory = await prisma.memory.create({
-      data: {
-        spotifyTrackId,
+    const memoryId = crypto.randomUUID()
+
+    const { data: memory, error: insertError } = await supabase
+      .from('memory')
+      .insert({
+        id: memoryId,
+        spotify_track_id: spotifyTrackId,
         blurb: blurb.trim(),
         sentiment,
-      },
-    })
+      })
+      .select()
+      .single()
 
-    const allMemories = await prisma.memory.findMany({
-      where: {
-        id: { not: memory.id },
-      },
-    })
+    if (insertError) {
+      throw insertError
+    }
 
-    if (allMemories.length === 0) {
+    const { data: allMemories, error: fetchError } = await supabase
+      .from('memory')
+      .select('*')
+      .neq('id', memory.id)
+
+    if (fetchError) {
+      throw fetchError
+    }
+
+    if (!allMemories || allMemories.length === 0) {
       return NextResponse.json({ empty: true })
     }
 
-    const sameSentimentMemories = allMemories.filter((m: { sentiment: number }) => m.sentiment === sentiment)
+    const sameSentimentMemories = allMemories.filter((m) => m.sentiment === sentiment)
     let matchMemory
 
     if (sameSentimentMemories.length >= 10) {
@@ -49,20 +61,21 @@ export async function POST(request: NextRequest) {
       matchMemory = allMemories[Math.floor(Math.random() * allMemories.length)]
     }
 
-    const matchTrack = await getTrack(matchMemory.spotifyTrackId)
+    const matchTrack = await getTrack(matchMemory.spotify_track_id)
 
     return NextResponse.json({
       matchMemory: {
         id: matchMemory.id,
         blurb: matchMemory.blurb,
-        createdAt: matchMemory.createdAt,
+        createdAt: matchMemory.created_at,
       },
       matchTrack,
     })
   } catch (error) {
     console.error('Memory creation error:', error)
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error'
     return NextResponse.json(
-      { error: 'Failed to create memory' },
+      { error: `Failed to create memory: ${errorMessage}` },
       { status: 500 }
     )
   }
