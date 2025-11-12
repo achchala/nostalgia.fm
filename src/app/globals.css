@@ -1,0 +1,43 @@
+@import "tailwindcss";
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-merriweather), serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-transform: lowercase;
+}
+
+/* Pink accent color */
+:root {
+  --pink: #ffc0cb;
+  --pink-dark: #ffb6c1;
+}
+
+/* Clean form styles */
+input,
+textarea {
+  font-family: inherit;
+}
+
+input:focus,
+textarea:focus {
+  outline: none;
+}
+
+/* Thin black borders - use with Tailwind border class */
+
+/* Pink buttons */
+.btn-pink {
+  background-color: var(--pink);
+  border: 1px solid black;
+  color: black;
+}
+
+.btn-pink:hover {
+  background-color: var(--pink-dark);
+}
