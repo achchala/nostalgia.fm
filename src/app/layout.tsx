@@ -22,6 +22,17 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${merriweather.variable} antialiased bg-white text-black font-serif`}>
         <main className="max-w-2xl mx-auto p-8">{children}</main>
+        <footer className="fixed bottom-4 right-4 text-sm">
+          <span className="text-black">made by </span>
+          <a
+            href="https://achchala.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-[#ffc0cb] underline hover:text-black"
+          >
+            @achchala
+          </a>
+        </footer>
       </body>
     </html>
   );

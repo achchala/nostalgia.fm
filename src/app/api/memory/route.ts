@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabase } from '@/lib/supabase'
-import { bucketize } from '@/lib/sentiment'
+import { bucketize, wordSimilarity } from '@/lib/sentiment'
 import { getTrack } from '@/lib/spotify'
 
 export async function POST(request: NextRequest) {
@@ -35,9 +35,19 @@ export async function POST(request: NextRequest) {
   }
 
   const sameSentimentMemories = allMemories.filter((m) => m.sentiment === sentiment)
-  const matchMemory = sameSentimentMemories.length >= 10
-    ? sameSentimentMemories[Math.floor(Math.random() * sameSentimentMemories.length)]
-    : allMemories[Math.floor(Math.random() * allMemories.length)]
+  
+  let candidates = sameSentimentMemories.length >= 5 ? sameSentimentMemories : allMemories
+  
+  // score by word similarity
+  const scored = candidates.map(m => ({
+    memory: m,
+    score: wordSimilarity(blurb, m.blurb)
+  }))
+  
+  // sort by similarity, then pick from top 50% (so it's not always the exact same)
+  scored.sort((a, b) => b.score - a.score)
+  const topHalf = scored.slice(0, Math.max(1, Math.floor(scored.length / 2)))
+  const matchMemory = topHalf[Math.floor(Math.random() * topHalf.length)].memory
 
   const matchTrack = await getTrack(matchMemory.spotify_track_id)
 
