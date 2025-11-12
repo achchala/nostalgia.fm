@@ -9,8 +9,8 @@ const merriweather = Merriweather({
 });
 
 export const metadata: Metadata = {
-  title: "Nostalgia.fm",
-  description: "Every song has a story. Pick a track, write a memory, and receive one back.",
+  title: "nostalgia.fm",
+  description: "every song has a story. pick a song, write your memory associated with it, and get one back.",
 };
 
 export default function RootLayout({
